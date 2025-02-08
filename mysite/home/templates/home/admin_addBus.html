@@ -1,0 +1,11 @@
+{%extends 'home/admin_base.html'%}
+{%block addBus%}active{%endblock addBus%}
+{%load crispy_forms_tags%}
+{%block content%}
+    <h1 class = "border-bottom mb-4">Add a New Bus</h1>
+    <form method = "post">
+        {%csrf_token%}
+        {{form | crispy}}
+        <button type = "submit" class = "btn btn-primary">Add Bus</button>
+    </form>
+{%endblock content%}
