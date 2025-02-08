@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.views.generic.edit import CreateView
 from . models import *
 from . decorators import *
+from . forms import *
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
@@ -56,9 +57,23 @@ def admin_home(request):
 
 @method_decorator(login_required(login_url='login'), name = 'dispatch')
 @method_decorator(allowed_users(allowed_roles=['admin']), name = 'dispatch')
-class admin_addBus(CreateView):
-    model = bus
-    fields = ['name', 'bus_number', 'city1', 'city2', 'seats_total', 'days', 'time', 'duration']
-    template_name = 'home/admin_addBus.html'
-#admin views end here.....
+class admin_addBus(View):
+    def post(self, request):
+        form  = AddBusForm(request.POST)
+        if form.is_valid():
+            form.save()
+            bus_name = form.cleaned_data.get('name')
+            messages.success(request, f'{bus_name} was added successfully!')
+            return redirect('admin_home')
+        else:
+            messages.error(request, f'The data entered was not correct')
+            return render(request, 'home/admin_addBus.html', {'form': form})
+
+    def get(self, request):
+        form = AddBusForm()
+        return render(request, 'home/admin_addBus.html', {'form': form})
+
+
+
+# admin views end here.....
 
