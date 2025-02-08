@@ -29,7 +29,8 @@ class bus(models.Model):
     seats_total = models.PositiveIntegerField(validators=[MaxValueValidator(100)])
     seats_available = models.PositiveIntegerField(validators=[MaxValueValidator(100)])
     days = models.ManyToManyField(day)
-    time = models.TimeField(default = timezone.now(), blank=False, null=False)
+    time = models.TimeField(default = timezone.now, blank=False, null=False)
+    duration = models.IntegerField(default = 0, null=False, blank=False, validators=[MaxValueValidator(24), MinValueValidator(1)])
         
     def __str__(self):
         return self.name

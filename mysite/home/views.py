@@ -58,7 +58,7 @@ def admin_home(request):
 @method_decorator(allowed_users(allowed_roles=['admin']), name = 'dispatch')
 class admin_addBus(CreateView):
     model = bus
-    fields = ['city1', 'city2', 'seats_total', 'timing']
+    fields = ['name', 'bus_number', 'city1', 'city2', 'seats_total', 'days', 'time', 'duration']
     template_name = 'home/admin_addBus.html'
 #admin views end here.....
 
