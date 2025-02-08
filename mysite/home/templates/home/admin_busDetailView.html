@@ -1,0 +1,20 @@
+{%extends 'home/admin_base.html'%}
+{%block title%}<title>{{bus.name}}</title>{%endblock title%}
+
+{%block content%}
+    {%if bus%}
+        <h1 class = "border-bottom mb-4 mt-3">{{bus.name}}</h1>
+        <p class = "form-group"><strong>Bus Number: </strong><span>{{bus.bus_number}}</span></p>
+        <p class = "form-group"><strong>Name: </strong><span>{{bus.name}}</span></p>
+        <p class = "form-group"><strong>From: </strong><span>{{bus.city1}}</span></p>
+        <p class = "form-group"><strong>To: </strong><span>{{bus.city2}}</span></p>
+        <p class = "form-group"><strong>Total Seats: </strong><span>{{bus.seats_total}}</span></p>
+        <p class = "form-group"><strong>Available Seats: </strong><span>{{bus.seats_available}}</span></p>
+        <p class = "form-group"><strong>Operating days: </strong><span>{{bus.operating_days}}</span></p>
+        <p class = "form-group"><strong>Departing Time: </strong><span>{{bus.time_start}}</span></p>
+        <p class = "form-group"><strong>Fare: </strong><span>&#8377; {{bus.fare}}</span></p>
+        <a class = "form-group" href = "{%url 'admin_busUpdateView' bus.id%}"><button class = "btn btn-primary">Update Bus Details</button></a>
+    {%else%}
+        <p class = "mt-3"><strong>The bus with the queried id doesn't exist</strong></p>
+    {%endif%}
+{%endblock content%}

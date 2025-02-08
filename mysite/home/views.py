@@ -3,7 +3,8 @@ from django.views import View
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from django.contrib import messages
-from django.views.generic.edit import CreateView
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 from . models import *
 from . decorators import *
 from . forms import *
@@ -73,7 +74,39 @@ class admin_addBus(View):
         form = AddBusForm()
         return render(request, 'home/admin_addBus.html', {'form': form})
 
+@method_decorator(login_required(login_url='login'), name = 'dispatch')
+@method_decorator(allowed_users(allowed_roles=['admin']), name = 'dispatch')
+class admin_busListView(ListView):
+    model = bus
+    template_name = 'home/admin_busListView.html'
+    context_object_name = 'buses'
 
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['admin'])
+def admin_busDetailView(request, pk):
+    current_bus = None
+    if bus.objects.filter(id = pk).exists():
+        current_bus = bus.objects.filter(id = pk).first()
+    return render(request, 'home/admin_busDetailView.html', {'bus': current_bus})
+
+@method_decorator(login_required(login_url='login'), name = 'dispatch')
+@method_decorator(allowed_users(allowed_roles=['admin']), name = 'dispatch')
+class admin_busUpdateView(View):
+    def post(self, request, pk):
+        form  = AddBusForm(request.POST)
+        if form.is_valid():
+            form.save()
+            bus_name = form.cleaned_data.get('name')
+            messages.success(request, f'{bus_name} was updated successfully!')
+            return redirect('admin_busDetailView', pk = pk)
+        else:
+            messages.error(request, f'The data entered was not correct')
+            return render(request, 'home/admin_busUpdateView.html', {'form': form})
+
+    def get(self, request, pk):
+        current_bus = bus.objects.get(id = pk)
+        form = AddBusForm(instance = current_bus)
+        return render(request, 'home/admin_busUpdateView.html', {'form': form})
 
 # admin views end here.....
 
