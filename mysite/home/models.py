@@ -24,8 +24,7 @@ from django.contrib.postgres.fields import ArrayField
 
 class bus(models.Model):  
     bus_number = models.IntegerField(
-        validators=[MaxValueValidator(99999), MinValueValidator(10000)],
-        unique=True  
+        validators=[MaxValueValidator(99999), MinValueValidator(10000)]  
     )
     name = models.CharField(max_length=50)  
     city1 = models.CharField(max_length=30)

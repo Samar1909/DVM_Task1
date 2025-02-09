@@ -47,7 +47,10 @@ def logoutView(request):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['passenger'])
 def pass_home(request):
-    return HttpResponse("This is passenger home")
+    return render(request, 'home/pass_home.html')
+
+
+
 #passenger views end here.....
 
 #admin views start here....
@@ -93,7 +96,8 @@ def admin_busDetailView(request, pk):
 @method_decorator(allowed_users(allowed_roles=['admin']), name = 'dispatch')
 class admin_busUpdateView(View):
     def post(self, request, pk):
-        form  = AddBusForm(request.POST)
+        current_bus = bus.objects.get(id = pk)
+        form  = AddBusForm(request.POST, instance = current_bus)
         if form.is_valid():
             form.save()
             bus_name = form.cleaned_data.get('name')

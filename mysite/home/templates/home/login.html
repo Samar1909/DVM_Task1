@@ -1,3 +1,4 @@
+{%load socialaccount %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <div class="container">
@@ -21,7 +23,6 @@
                 {% endif %}
             </div>
         </div>
-        
         <!-- Login Form Section -->
         <div class="row justify-content-center min-vh-100 align-items-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
@@ -41,6 +42,18 @@
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
                             </div>
+
+                            <div class="position-relative my-4">
+                                <hr>
+                                <p class="text-center position-absolute top-50 start-50 translate-middle bg-white px-3">or</p>
+                            </div>
+                           
+                            <div class="d-grid">
+                                <a href="{% provider_login_url 'google' %}?next = {%url 'home'%}" class="btn btn-outline-dark btn-lg">
+                                    <i class="fab fa-google me-2"></i> Sign in with Google
+                                </a>
+                            </div>
+
                             <hr class="my-4">
                             <div class="text-center">
                                 <p class="mb-0">Don't have an account? <a href="#" class="text-decoration-none">Sign up</a></p>
@@ -53,4 +66,4 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html>https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?client_id=903355898357-5d2osp9polv3u6ci2hmlk4phokbsgdnt.apps.googleusercontent.com&redirect_uri=http%3A%2F%2F127.0.0.1%3A8000%2Faccounts%2Fgoogle%2Flogin%2Fcallback%2F&scope=profile%20email&response_type=code&state=ObdVbMkvxNoqs0zN&access_type=online&service=lso&o2v=2&ddm=1&flowName=GeneralOAuthFlow

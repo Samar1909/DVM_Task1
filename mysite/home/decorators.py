@@ -1,13 +1,20 @@
 from django.shortcuts import redirect
 from django.http import HttpResponse
+from django.contrib.auth.models import Group
+
+admin_group = Group.objects.get(name = 'admin')
+pass_group = Group.objects.get(name = 'passenger')
 
 def unauthenticated_user(view_func):
     def wrapper_func(request, *args, **kwargs):
         if request.user.is_authenticated:
             if request.user.groups.filter(name = 'passenger').exists():
                 return redirect('pass_home')
-            else:
+            elif request.user.groups.filter(name = 'admin').exists():
                 return redirect('admin_home')
+            else:
+                request.user.groups.set([pass_group]) #I have assumed that only passengers have the ability to sign in with google
+                return redirect('pass_home')
         else:
             return view_func(request, *args, **kwargs)
     
