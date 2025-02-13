@@ -1,3 +1,19 @@
 {%extends 'home/pass_base.html'%}
 {%block title%}<title>Passenger Home</title>{%endblock title%}
 {%block home%}active{%endblock home%}
+
+{%block content%}
+    <h1 class = "border-bottom mb-4">Welcome {{user.username}}!</h1>
+    <div class="card w-75 mb-3" style="width: 18rem;">
+        <div class="card-body">
+          <h3 class="card-title">My Wallet</h5>
+          <p><strong>Your balance: </strong>&#8377; {{balance}}</p>
+          <a href = "{%url 'pass_updateWallet'%}">
+            <button class = "btn btn-primary" type = "submit">Add Money To wallet</button>
+          </a> 
+        </div>
+      </div>
+    <div class = "container">
+    
+    </div>
+{%endblock content%}

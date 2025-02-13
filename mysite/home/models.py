@@ -75,11 +75,25 @@ class bus(models.Model):
         super().save(*args, **kwargs)    
         
 
-class booking(models.Model):
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
+class ticket(models.Model):
+    num = models.PositiveIntegerField(validators = [MinValueValidator(1)])
+    users = models.ManyToManyField(User)
     bus  = models.ForeignKey(bus, on_delete = models.CASCADE)
-    is_booked = models.BooleanField(default = False)
+    dateOfBooking = models.DateField(default=timezone.now)
+    price = models.PositiveIntegerField(validators=[MaxValueValidator(10000)])
+    city1 = models.CharField(max_length=50)
+    city2 = models.CharField(max_length=50)
 
-class account(models.Model):
+class passDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ticket = models.ForeignKey(ticket, on_delete=models.CASCADE)
+    age = models.PositiveIntegerField(validators=[MaxValueValidator(100)])
+    fname = models.CharField(max_length=50)
+    lname = models.CharField(max_length=50)
+
+class wallet(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
-    amount = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10000)])
+    amount = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10000)], default=0)
+
+    def __str__(self):
+        return str(self.user)

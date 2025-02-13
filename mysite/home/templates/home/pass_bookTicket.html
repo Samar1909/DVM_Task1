@@ -1,0 +1,29 @@
+{% extends 'home/pass_base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<h1 class="border-bottom mt-3 mb-4">Book Tickets</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}  
+    
+    <input type="hidden" name="num_pass" value="{{ num_pass }}">
+    
+    <fieldset>
+        <legend>Enter Passenger Details:</legend>
+        {% for form in formset %}
+            <div class="passenger-form mb-4">
+                <h4>Passenger {{ forloop.counter }}</h4>
+                {{ form|crispy }}
+            </div>
+        {% endfor %}
+    </fieldset>
+    
+    <button type="submit" name="addPassenger" class="btn btn-outline-dark">Add Passenger</button>
+    {% if num_pass > 1 %}
+        <button type="submit" name="removePassenger" class="btn btn-outline-dark">Remove Passenger</button>
+    {% endif %}
+    <br>
+    <button type="submit" name="submitBooking" class="btn btn-outline-success mt-2">Book Ticket</button>
+</form>
+{% endblock content %}
+

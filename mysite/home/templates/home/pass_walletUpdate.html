@@ -1,0 +1,10 @@
+{% extends 'home/pass_base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <h1 class="border-bottom mt-3 mb-4">Book Tickets</h1>
+    <form method="post" action = "">
+        {% csrf_token %}
+        {{form | crispy}}
+        <button type = "submit" class = "btn btn-outline-success">Add Money</button>
+    </form>
+{%endblock content%}

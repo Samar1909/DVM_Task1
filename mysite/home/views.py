@@ -8,6 +8,7 @@ from django.views.generic.detail import DetailView
 from . models import *
 from . decorators import *
 from . forms import *
+from django.forms import formset_factory
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 
@@ -47,9 +48,99 @@ def logoutView(request):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['passenger'])
 def pass_home(request):
-    return render(request, 'home/pass_home.html')
+    balance = request.user.wallet.amount
+    return render(request, 'home/pass_home.html', {'balance': balance})
+
+@method_decorator(login_required(login_url='login'), name = 'dispatch')
+@method_decorator(allowed_users(allowed_roles=['passenger']), name = 'dispatch')
+class pass_updateWallet(View):
+    def post(self, request):
+        form = WalletUpdateForm(request.POST)
+        user_wallet = request.user.wallet
+        if form.is_valid():
+            if (user_wallet.amount + form.cleaned_data.get('amount')) < 10000:
+                user_wallet.amount = user_wallet.amount + form.cleaned_data.get('amount')
+                user_wallet.save()
+                messages.success(request, f'Rs {form.cleaned_data.get('amount')} was successfully added to your wallet. Your balance is now Rs {user_wallet.amount}')
+                return redirect('pass_home')
+            else:
+                messages.warning(request, f"Balance can't exceed Rs 10000. Your current balance is {user_wallet.amount}")
+              
+        return render(request, 'home/pass_walletUpdate.html', {'form': form})
+    def get(self, request):
+        form = WalletUpdateForm()
+        return render(request, 'home/pass_walletUpdate.html', {'form': form})
 
 
+
+def pass_bookTicket(request, pk):
+    current_bus = bus.objects.filter(id=pk).first()
+    # Get number of passengers from POST or session
+    num_pass = int(request.POST.get('num_pass', request.session.get('num_pass', 1)))
+    
+    PassengerFormSet = formset_factory(PassengerDetailForm, extra=0)
+    
+    if request.method == 'POST':
+        # Handle add/remove passenger buttons
+        existing_data = []
+        formset = PassengerFormSet(request.POST)
+        if formset.is_valid():
+            for form in formset:
+                existing_data.append(form)
+        else:
+            messages.error(request, "The data entered was not correct")
+            return render(request, 'home/pass_bookTicket.html', {
+                'formset': formset, 
+                'num_pass': num_pass,
+                'current_bus': current_bus
+            })
+        
+        if 'addPassenger' in request.POST:
+            num_pass += 1
+            # Store in session
+            request.session['num_pass'] = num_pass
+            # Create new formset with updated number
+            formset = PassengerFormSet(initial=existing_data)
+            return render(request, 'home/pass_bookTicket.html', {
+                'formset': formset, 
+                'num_pass': num_pass,
+                'current_bus': current_bus
+            })
+            
+        if 'removePassenger' in request.POST:
+            if num_pass > 1:
+                num_pass -= 1
+                request.session['num_pass'] = num_pass
+                formset = PassengerFormSet(initial=existing_data)
+                return render(request, 'home/pass_bookTicket.html', {
+                    'formset': formset, 
+                    'num_pass': num_pass,
+                    'current_bus': current_bus
+                })
+            else:
+                messages.error(request, "There should be at least 1 passenger")
+        
+        # Handle form submission
+        if 'submitBooking' in request.POST:
+            formset = PassengerFormSet(request.POST)
+            if formset.is_valid():
+                for form in formset:
+                    print(form.cleaned_data)
+                return redirect('pass_home')
+            else:
+                messages.error(request, "The data entered was not correct")
+    else:
+        # GET request
+        formset = PassengerFormSet(initial=[{} for _ in range(num_pass)])
+    
+    return render(request, 'home/pass_bookTicket.html', {
+        'formset': formset, 
+        'num_pass': num_pass,
+        'current_bus': current_bus
+    })
+
+      
+    
 
 #passenger views end here.....
 
@@ -57,7 +148,9 @@ def pass_home(request):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
 def admin_home(request):
-    return render(request, 'home/admin_home.html')
+    return render(request, 'home/admin_home.html', {'balance': balance})
+
+
 
 @method_decorator(login_required(login_url='login'), name = 'dispatch')
 @method_decorator(allowed_users(allowed_roles=['admin']), name = 'dispatch')
