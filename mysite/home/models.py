@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
+from datetime import datetime, timedelta
 
 
 day_List = [('Mon', 'Monday'),
@@ -13,6 +14,8 @@ day_List = [('Mon', 'Monday'),
             ('Fri', 'Friday'),
             ('Sat', 'Saturday'),
             ('Sun', 'Sunday')]
+
+day_map = {'Mon': 0, 'Tue': 1, 'Wed': 2, 'Thu': 3, 'Fri': 4, 'Thu': 5, 'Sat': 6, 'Sun': 7}
 
 time_validator = RegexValidator(r'^([01]\d|2[0-3])([0-5]\d)$', 'Enter a valid time in 24 hour format') 
 
@@ -97,3 +100,28 @@ class wallet(models.Model):
 
     def __str__(self):
         return str(self.user)
+    
+class schedule(models.Model):
+    bus = models.OneToOneField(bus, on_delete=models.CASCADE)
+    dates = ArrayField(models.DateField(), default=list)
+
+    def __str__(self):
+        return f'{self.bus} schedule'
+    
+def get_upcoming_day(target_day):
+    today = datetime.now()
+    target = day_map[target_day]
+    if target > today.weekday():
+        a = target - today.weekday()
+    elif target <= today.weekday():
+        a = 7 + target - today.weekday()
+    return (today + timedelta(days = a))
+    
+
+def update_schedule():
+    buses = bus.objects.all()
+    
+    for bus in buses:
+        newDates = [get_upcoming_day(day) for day in bus.operating_days]
+        bus.schedule.dates = newDates
+        bus.schedule.save()

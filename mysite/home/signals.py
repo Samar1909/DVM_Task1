@@ -1,4 +1,4 @@
-from . models import wallet
+from . models import wallet, bus, schedule
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
@@ -15,3 +15,17 @@ def update_wallet(sender, instance, created, **kwargs):
         print(f'Wallet Updated for {instance.username}')
 
 post_save.connect(update_wallet, sender=User)
+
+def create_schedule(sender, instance, created, **kwargs):
+    if created:
+        schedule.objects.create(bus = instance)
+        print(f'schedule created for {instance.name}')
+
+post_save.connect(create_schedule, sender=bus)
+
+def update_schedule(sender, instance, created, **kwargs):
+    if created == False:
+        schedule.objects.create(bus = instance)
+        print(f'schedule created for {instance.name}')
+
+post_save.connect(update_schedule, sender=bus)

@@ -21,7 +21,7 @@
     <tbody>
         {%for bus in buses%}
         <tr>
-            <th scope="row">{{bus.id}}</th>
+            <th scope="row">{{forloop.counter}}</th>
             <td><a href = "{%url 'admin_busDetailView' bus.id %}">{{bus.name}}</a></td>
             <td>{{bus.bus_number}}</td>
             <td>{{bus.city1}}</td>

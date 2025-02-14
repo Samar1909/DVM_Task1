@@ -148,7 +148,7 @@ def pass_bookTicket(request, pk):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
 def admin_home(request):
-    return render(request, 'home/admin_home.html', {'balance': balance})
+    return render(request, 'home/admin_home.html')
 
 
 
