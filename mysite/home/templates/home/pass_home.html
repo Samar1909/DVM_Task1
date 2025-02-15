@@ -4,6 +4,21 @@
 
 {%block content%}
     <h1 class = "border-bottom mb-4">Welcome {{user.username}}!</h1>
+    <div class = "container">
+    <div class="card w-75 mb-3" style="width: 18rem;">
+      <form class="d-flex" role="search">
+          {{form.city1}}
+          {{form.city2}}
+          {{form.date}}
+          <input class="form-control me-2" type="search" placeholder="From" aria-label="Search">
+          <input class="form-control me-2" type="search" placeholder="To" aria-label="Search">
+          <input class="form-control me-2" type="search" placeholder="Date" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+      </form>
+    </div>
+    </div>
+  </div>
+  <div class = "container">
     <div class="card w-75 mb-3" style="width: 18rem;">
         <div class="card-body">
           <h3 class="card-title">My Wallet</h5>
@@ -15,5 +30,11 @@
       </div>
     <div class = "container">
     
+    </div>
+    <div>
+      {%for schedule in schedules%}
+      <h3>{{schedule.bus}}</h3>
+      <h4>{{schedule.dates}}</h4>
+      {%endfor%}
     </div>
 {%endblock content%}

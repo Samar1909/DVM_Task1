@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
 from datetime import datetime, timedelta
-
+import logging
 
 day_List = [('Mon', 'Monday'),
             ('Tue', 'Tuesday'),
@@ -106,6 +106,7 @@ class schedule(models.Model):
     dates = ArrayField(models.DateField(), default=list)
 
     def __str__(self):
+        self.dates = list(set(self.dates)) #removing duplicate dates if any
         return f'{self.bus} schedule'
     
 def get_upcoming_day(target_day):
@@ -119,9 +120,10 @@ def get_upcoming_day(target_day):
     
 
 def update_schedule():
+    from home.models import bus
+    print("Updating schedule....")
     buses = bus.objects.all()
-    
-    for bus in buses:
-        newDates = [get_upcoming_day(day) for day in bus.operating_days]
-        bus.schedule.dates = newDates
-        bus.schedule.save()
+    for bus_obj in buses:
+        newDates = [get_upcoming_day(day) for day in bus_obj.operating_days]
+        bus_obj.schedule.dates = newDates
+        bus_obj.schedule.save()

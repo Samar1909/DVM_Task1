@@ -44,12 +44,29 @@ def logoutView(request):
     logout(request)
     return redirect('home')
 
+
+@login_required(login_url='login')
+def handleSearch(request):
+    if request.user.groups.filter(name = "passenger").exists():
+        base_template = 'home/pass_base.html'
+    else:
+        base_template = 'home/admin_base.html'
+
+    form = searchForm(request.GET)
+    busList = bus.objects.filter(city1__icontains = form.cleaned_data.get('city1'),
+                                 city2__icontains = form.cleaned_data.get('city2'),
+                                 schedule__dates__contains = form.cleaned_data.get('date'))
+    return render(request, 'home/handleSearch.html', {'busList': busList})
+
+
 #passenger views start here....
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['passenger'])
 def pass_home(request):
     balance = request.user.wallet.amount
-    return render(request, 'home/pass_home.html', {'balance': balance})
+    schedules = schedule.objects.all()
+    form = searchForm()
+    return render(request, 'home/pass_home.html', {'balance': balance, 'schedules': schedules, 'form': form})
 
 @method_decorator(login_required(login_url='login'), name = 'dispatch')
 @method_decorator(allowed_users(allowed_roles=['passenger']), name = 'dispatch')
@@ -70,8 +87,7 @@ class pass_updateWallet(View):
     def get(self, request):
         form = WalletUpdateForm()
         return render(request, 'home/pass_walletUpdate.html', {'form': form})
-
-
+    
 
 def pass_bookTicket(request, pk):
     current_bus = bus.objects.filter(id=pk).first()
@@ -148,7 +164,9 @@ def pass_bookTicket(request, pk):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
 def admin_home(request):
-    return render(request, 'home/admin_home.html')
+    schedules = schedule.objects.all()
+    print(schedules)
+    return render(request, 'home/admin_home.html', {'schedules': schedules})
 
 
 

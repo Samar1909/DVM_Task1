@@ -1,2 +1,11 @@
 {%extends 'home/admin_base.html'%}
 {%block home%}active{%endblock home%}
+
+{%block content%}
+<div>
+    {%for schedule in schedules%}
+    <h3>{{schedule.bus}}</h3>
+    <h4>{{schedule.dates}}</h4>
+    {%endfor%}
+</div>
+{%endblock content%}

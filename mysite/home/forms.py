@@ -21,3 +21,18 @@ class WalletUpdateForm(forms.Form):
         label="Amount To Add",
         widget =forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter Amount'})  
     )
+
+class searchForm(forms.Form):
+    city1 = forms.CharField(
+        label = "From",
+        max_length = 100
+    )
+    city2 = forms.CharField(
+        label="To",
+        max_length=100)
+    
+    date = forms.DateField(
+        label = "Date",
+        widget = forms.DateInput()
+    )
+

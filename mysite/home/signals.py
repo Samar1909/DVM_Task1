@@ -1,4 +1,4 @@
-from . models import wallet, bus, schedule
+from . models import wallet, bus, schedule, get_upcoming_day
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
@@ -19,6 +19,9 @@ post_save.connect(update_wallet, sender=User)
 def create_schedule(sender, instance, created, **kwargs):
     if created:
         schedule.objects.create(bus = instance)
+        # newDates = [get_upcoming_day(day) for day in instance.operating_days]
+        # instance.schedule.dates = newDates
+        # instance.schedule.save()
         print(f'schedule created for {instance.name}')
 
 post_save.connect(create_schedule, sender=bus)
