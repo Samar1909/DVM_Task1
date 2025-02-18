@@ -7,6 +7,6 @@ class HomeConfig(AppConfig):
     name = 'home'
 
     def ready(self):
-        from home.updaters import start
+        # from home.updaters import start
         import home.signals
-        start()
+        # start()

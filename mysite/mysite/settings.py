@@ -28,6 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = "home.MyUser"     
+
 
 
 # Application definition
@@ -44,11 +46,11 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google', 
-    'home.apps.HomeConfig',
     'crispy_forms',
     'crispy_bootstrap5',
     'django_apscheduler',
-]
+    'home.apps.HomeConfig',
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -162,4 +164,12 @@ SOCIALACCOUNT_PROVIDERS = {
         
     }
 }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Use your email provider's SMTP server
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'Simarjot1909@gmail.com'
+EMAIL_HOST_PASSWORD = 'mjuqrayzufaezdvl'
 

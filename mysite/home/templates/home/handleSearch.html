@@ -1,0 +1,37 @@
+{%extends 'home/pass_base.html'%}
+{%block content%}
+<h1 class = "border-bottom mb-3 mt-3">List of Buses</h1>
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Bus Number</th>
+        <th scope="col">From</th>
+        <th scope="col">To</th>
+        <th scope="col">Total Seats</th>
+        <th scope="col">Available Seats</th>
+        <th scope="col">Departing Time</th>
+        <th scope="col">Ariving Time</th>
+        <th scope="col">Fare</th>
+      </tr>
+    </thead>
+    <tbody>
+        {%for bus in busList%}
+        <tr>
+            <th scope="row">{{forloop.counter}}</th>
+            <td><a href = "{%url 'pass_bookTicket' bus.id%}">{{bus.name}}</a></td>
+            <td>{{bus.bus_number}}</td>
+            <td>{{bus.city1}}</td>
+            <td>{{bus.city2}}</td>
+            <td>{{bus.seats_total}}</td>
+            <td>{{bus.seats_available}}</td>
+            <td>{{bus.time_start}} Hours</td>
+            <td>{{bus.time_end}} Hours</td>
+            <td>&#8377; {{bus.fare}}</td>
+        </tr> 
+        {%endfor%}
+
+    </tbody>
+</table>
+{%endblock%}

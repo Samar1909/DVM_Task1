@@ -28,19 +28,28 @@
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
                 <div class="card shadow-sm">
                     <div class="card-body p-4 p-sm-5">
-                        <h1 class="card-title text-center mb-4">Login</h1>
+                        <h1 class="card-title text-center mb-4">Sign Up</h1>
                         <form method="post" action="">
                             {% csrf_token %}
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
+                                {{form.username}}
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Email</label>
+                                {{form.email}}
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
+                                {{form.password1}}
                             </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Enter Password Again</label>
+                                {{form.password2}}
+                            </div>
+                            
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
+                                <button type="submit" class="btn btn-primary btn-lg">Sign Up</button>
                             </div>
 
                             <div class="position-relative my-4">
@@ -50,13 +59,13 @@
                            
                             <div class="d-grid">
                                 <a href="{% provider_login_url 'google' %}?next = {%url 'home'%}" class="btn btn-outline-dark btn-lg">
-                                    <i class="fab fa-google me-2"></i> Sign in / Sign Up with Google
+                                    <i class="fab fa-google me-2"></i> Sign Up / Sign In with Google
                                 </a>
                             </div>
 
                             <hr class="my-4">
                             <div class="text-center">
-                                <p class="mb-0">Don't have an account? <a href="{%url 'register'%}" class="text-decoration-none">Sign up</a></p>
+                                <p class="mb-0">ALready have an account? <a href="{%url 'login'%}" class="text-decoration-none">Log In</a></p>
                             </div>
                         </form>
                     </div>

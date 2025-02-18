@@ -1,4 +1,5 @@
 {%extends 'home/pass_base.html'%}
+{% load crispy_forms_tags %}
 {%block title%}<title>Passenger Home</title>{%endblock title%}
 {%block home%}active{%endblock home%}
 
@@ -6,22 +7,36 @@
     <h1 class = "border-bottom mb-4">Welcome {{user.username}}!</h1>
     <div class = "container">
     <div class="card w-75 mb-3" style="width: 18rem;">
-      <form class="d-flex" role="search">
-          {{form.city1}}
-          {{form.city2}}
-          {{form.date}}
-          <input class="form-control me-2" type="search" placeholder="From" aria-label="Search">
-          <input class="form-control me-2" type="search" placeholder="To" aria-label="Search">
-          <input class="form-control me-2" type="search" placeholder="Date" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
+      <div class="card-body">
+        <h3 class="card-title border-bottom mb-4">Search for Buses</h5>
+      <form class="d-flex flex-column" role="search" action = "{%url 'search'%}">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="{{ form.city1.id_for_label }}" class="form-label">{{ form.city1.label }}</label>
+                {{ form.city1 }}
+            </div>
+            <div class="col-md-6">
+                <label for="{{ form.city2.id_for_label }}" class="form-label">{{ form.city2.label }}</label>
+                {{ form.city2 }}
+            </div>
+        </div>
+        
+        <div class="row mb-3">
+            <div class="col-12">
+                <label for="{{ form.date.id_for_label }}" class="form-label">{{ form.date.label }}</label>
+                {{ form.date }}
+            </div>
+        </div>
+        
+        <button class="btn btn-outline-success" type="submit">Search</button>
+    </form>
     </div>
     </div>
   </div>
   <div class = "container">
     <div class="card w-75 mb-3" style="width: 18rem;">
         <div class="card-body">
-          <h3 class="card-title">My Wallet</h5>
+          <h3 class="card-title border-bottom mb-4">My Wallet</h3>
           <p><strong>Your balance: </strong>&#8377; {{balance}}</p>
           <a href = "{%url 'pass_updateWallet'%}">
             <button class = "btn btn-primary" type = "submit">Add Money To wallet</button>

@@ -8,14 +8,67 @@ from django.views.generic.detail import DetailView
 from . models import *
 from . decorators import *
 from . forms import *
+from . utils import generate_otp, verify_otp
 from django.forms import formset_factory
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.core.mail import send_mail
+from django.conf import settings
+from django.db import IntegrityError
 
 # Create your views here.
 @unauthenticated_user
 def home(request):
     return render(request, template_name = "home/home.html")
+
+class registerView(View):
+    def post(self, request):
+        form = registerForm(request.POST)
+        if form.is_valid():
+            try:
+                new_user = form.save()
+            except IntegrityError:
+                messages.error(request, f'The user with this email already exists.')
+            except Exception as e:
+                messages.error(request, f'Some unexpected error has occured')
+            email_otp = generate_otp()
+            new_user.email_otp = email_otp
+            new_user.save()
+
+            send_mail(
+                'Email Verification OTP',
+                f'Your otp for email verification is {email_otp}',
+                settings.EMAIL_HOST_USER,
+                [form.cleaned_data.get('email')],
+                fail_silently = False
+                )
+            print(f'Email otp {new_user.email_otp}')
+            return redirect('verify_otp', user_id = new_user.pk)
+
+        else:
+            messages.error(request, f'{form.errors}')
+            return redirect('register')
+    def get(self, request):
+        form = registerForm()
+        return render(request, 'home/register.html', {'form': form})
+
+def verify_otp_func(request, user_id):
+    user = MyUser.objects.filter(id = user_id).first()
+    if request.method == 'POST':
+        user_otp = request.POST.get('email_otp')
+        if verify_otp(user_otp, user.email_otp):
+            user.is_email_verified = True
+            user.email_otp = None
+            user.groups.set([pass_group]) 
+            user.save()
+            login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+            return redirect('home')
+        else:
+            messages.error(request, f'Invalid OTP')
+
+    return render(request, 'home/verify_otp.html')
+
+
 
 @method_decorator(unauthenticated_user, name = 'dispatch')
 class loginView(View):
@@ -39,7 +92,7 @@ class loginView(View):
             return redirect('login')
     def get(self, request):
         return render(request, 'home/login.html')
-    
+
 def logoutView(request):
     logout(request)
     return redirect('home')
@@ -47,16 +100,19 @@ def logoutView(request):
 
 @login_required(login_url='login')
 def handleSearch(request):
-    if request.user.groups.filter(name = "passenger").exists():
-        base_template = 'home/pass_base.html'
-    else:
-        base_template = 'home/admin_base.html'
-
     form = searchForm(request.GET)
-    busList = bus.objects.filter(city1__icontains = form.cleaned_data.get('city1'),
-                                 city2__icontains = form.cleaned_data.get('city2'),
-                                 schedule__dates__contains = form.cleaned_data.get('date'))
-    return render(request, 'home/handleSearch.html', {'busList': busList})
+    if form.is_valid():
+        busList = bus.objects.filter(city1__icontains = form.cleaned_data.get('city1'),
+                                    city2__icontains = form.cleaned_data.get('city2'),
+                                    schedule__dates__contains=[form.cleaned_data.get('date')]
+                                    ).order_by('time_start')
+        print(f'busList is {busList}')
+        if len(busList) == 0:
+            messages.info(request, f'Sorry No buses available at the moment')
+        return render(request, 'home/handleSearch.html', {'busList': busList})
+    else:
+        messages.warning(request, f'Pls refine your query')
+        return render(request, 'home/home.html', {'form': form})
 
 
 #passenger views start here....
@@ -165,8 +221,8 @@ def pass_bookTicket(request, pk):
 @allowed_users(allowed_roles=['admin'])
 def admin_home(request):
     schedules = schedule.objects.all()
-    print(schedules)
-    return render(request, 'home/admin_home.html', {'schedules': schedules})
+    form = searchForm()
+    return render(request, 'home/admin_home.html', {'schedules': schedules, 'form': form})
 
 
 

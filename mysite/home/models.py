@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
@@ -24,6 +24,11 @@ time_validator = RegexValidator(r'^([01]\d|2[0-3])([0-5]\d)$', 'Enter a valid ti
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+
+class MyUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    email_otp = models.CharField(max_length = 6, null = True, blank = False, default = None)
+    is_email_verified = models.BooleanField(default = False)
 
 class bus(models.Model):  
     bus_number = models.IntegerField(
@@ -80,7 +85,7 @@ class bus(models.Model):
 
 class ticket(models.Model):
     num = models.PositiveIntegerField(validators = [MinValueValidator(1)])
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(MyUser)
     bus  = models.ForeignKey(bus, on_delete = models.CASCADE)
     dateOfBooking = models.DateField(default=timezone.now)
     price = models.PositiveIntegerField(validators=[MaxValueValidator(10000)])
@@ -88,14 +93,14 @@ class ticket(models.Model):
     city2 = models.CharField(max_length=50)
 
 class passDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE)
     ticket = models.ForeignKey(ticket, on_delete=models.CASCADE)
     age = models.PositiveIntegerField(validators=[MaxValueValidator(100)])
     fname = models.CharField(max_length=50)
     lname = models.CharField(max_length=50)
 
 class wallet(models.Model):
-    user = models.OneToOneField(User, on_delete = models.CASCADE)
+    user = models.OneToOneField(MyUser, on_delete = models.CASCADE)
     amount = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(10000)], default=0)
 
     def __str__(self):
