@@ -116,6 +116,7 @@ def handleSearch(request):
 
 
 #passenger views start here....
+
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['passenger'])
 def pass_home(request):
@@ -147,69 +148,53 @@ class pass_updateWallet(View):
 
 def pass_bookTicket(request, pk):
     current_bus = bus.objects.filter(id=pk).first()
-    # Get number of passengers from POST or session
-    num_pass = int(request.POST.get('num_pass', request.session.get('num_pass', 1)))
-    
-    PassengerFormSet = formset_factory(PassengerDetailForm, extra=0)
     
     if request.method == 'POST':
-        # Handle add/remove passenger buttons
-        existing_data = []
-        formset = PassengerFormSet(request.POST)
-        if formset.is_valid():
-            for form in formset:
-                existing_data.append(form)
-        else:
-            messages.error(request, "The data entered was not correct")
-            return render(request, 'home/pass_bookTicket.html', {
-                'formset': formset, 
-                'num_pass': num_pass,
-                'current_bus': current_bus
-            })
+        num_pass = int(request.POST.get('num_pass'))
+        if num_pass < 1 or num_pass > 10:
+            messages.error(request, f'Can only book tickets for 1 to 10 passengers at a time')
+            return redirect('pass_bookTicket', pk = pk)
         
-        if 'addPassenger' in request.POST:
-            num_pass += 1
-            # Store in session
-            request.session['num_pass'] = num_pass
-            # Create new formset with updated number
-            formset = PassengerFormSet(initial=existing_data)
-            return render(request, 'home/pass_bookTicket.html', {
-                'formset': formset, 
-                'num_pass': num_pass,
-                'current_bus': current_bus
-            })
-            
-        if 'removePassenger' in request.POST:
-            if num_pass > 1:
-                num_pass -= 1
-                request.session['num_pass'] = num_pass
-                formset = PassengerFormSet(initial=existing_data)
-                return render(request, 'home/pass_bookTicket.html', {
-                    'formset': formset, 
-                    'num_pass': num_pass,
-                    'current_bus': current_bus
-                })
-            else:
-                messages.error(request, "There should be at least 1 passenger")
-        
-        # Handle form submission
+        PassengerFormSet = formset_factory(PassengerDetailForm, extra=num_pass)
+
         if 'submitBooking' in request.POST:
             formset = PassengerFormSet(request.POST)
             if formset.is_valid():
-                for form in formset:
-                    print(form.cleaned_data)
-                return redirect('pass_home')
+                if request.user.wallet.amount > num_pass*current_bus.fare:
+                    current_ticket = ticket.objects.create(num = str(num_pass), 
+                                        bus = current_bus, dateOfBooking = timezone.now(), 
+                                        price = num_pass*int(current_bus.fare),
+                                        city1 = current_bus.city1, city2 = current_bus.city2)
+                    for form in formset:
+                        new_instance = form.save(commit = False)
+                        new_instance.ticket = current_ticket
+                        new_instance.save()
+                        current_ticket.users.add(form.cleaned_data.get('user'))
+                        current_ticket.save()
+                    
+                    current_bus.seats_available -= num_pass
+                    request.user.wallet.amount -= current_ticket.price
+                    request.user.wallet.save()
+                    current_bus.save()
+                    messages.success(request, f'Your ticket was booked successfully! Rs{current_ticket.price} was deducted from your account')
+                    return redirect('home')
+                else:
+                    messages.error(request, f'Garib Saala')
             else:
-                messages.error(request, "The data entered was not correct")
-    else:
-        # GET request
-        formset = PassengerFormSet(initial=[{} for _ in range(num_pass)])
+                messages.error(request, "The data entered was not valid")
+        formset = PassengerFormSet()
+        return render(request, 'home/pass_bookTicket.html', {'formset': formset, 'num_pass': num_pass})           
+                 
+    if request.method == 'GET':
+        num_pass = 0
+        return render(request, 'home/pass_bookTicket.html', {'num_pass': num_pass})           
+        
+        
+def upcomingTripsView(request):
+    tickets = request.user.ticket_set.all()  
+    return render(request, 'home/upcomingTripView.html')    
+
     
-    return render(request, 'home/pass_bookTicket.html', {
-        'formset': formset, 
-        'num_pass': num_pass,
-        'current_bus': current_bus
-    })
 
       
     

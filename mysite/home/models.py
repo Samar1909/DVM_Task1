@@ -78,6 +78,7 @@ class bus(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
+            print("I am here")
             self.initialize_seats()
         self.seat_validator()  
         super().save(*args, **kwargs)    
@@ -111,7 +112,7 @@ class schedule(models.Model):
     dates = ArrayField(models.DateField(), default=list)
 
     def __str__(self):
-        self.dates = list(set(self.dates)) #removing duplicate dates if any
+        self.dates = list(set(self.dates)) #removing duplicate dates if any, since a python set doesn't have duplicate elements
         return f'{self.bus} schedule'
     
 def get_upcoming_day(target_day):

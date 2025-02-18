@@ -28,7 +28,6 @@ post_save.connect(create_schedule, sender=bus)
 
 def update_schedule(sender, instance, created, **kwargs):
     if created == False:
-        schedule.objects.create(bus = instance)
-        print(f'schedule created for {instance.name}')
+        instance.schedule.save()
 
 post_save.connect(update_schedule, sender=bus)
