@@ -1,0 +1,19 @@
+Dear {{username}},
+
+Your bus tickets have been successfully booked by {{ booked_by_user }}.
+
+
+Ticket Details:
+- Bus Number: {{ current_ticket.bus.bus_number  }}
+- Travel Date: {{ current_ticket.dateOfBooking|date:"F j, Y" }}
+- Departure Time: {{ current_ticket.bus.time_start }} Hours
+- From: {{ current_ticket.bus.city1 }}
+- To: {{ current_ticket.bus.city2 }}
+- Total Amount: {{ current_ticket.price }}
+
+Important Notes:
+- Please arrive at least 30 minutes before departure
+- Carry a valid photo ID for verification
+- Present this booking reference at the counter
+
+Thank you for choosing our service!

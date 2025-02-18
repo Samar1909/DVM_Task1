@@ -28,7 +28,7 @@
     {%csrf_token%}
     <h2>Enter Number of passengers: </h2>
     <input class = "form-control" type = "number" max="10" placeholder="Maximum-10" name = "num_pass" id = "num_pass">
-    <button type = "submit" class="btn btn-outline-primary mt-3">Submit</button>
+    <button type = "submit" class="btn btn-outline-primary mt-3" name = "pass_number">Submit</button>
 </form>
 {%endif%}
 {% endblock content %}

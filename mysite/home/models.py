@@ -92,6 +92,8 @@ class ticket(models.Model):
     price = models.PositiveIntegerField(validators=[MaxValueValidator(10000)])
     city1 = models.CharField(max_length=50)
     city2 = models.CharField(max_length=50)
+    email_otp = models.CharField(max_length=6, null = True, blank=True, default=None)
+    is_confirm = models.BooleanField(default=False)
 
 class passDetails(models.Model):
     user = models.ForeignKey(MyUser, on_delete=models.CASCADE)

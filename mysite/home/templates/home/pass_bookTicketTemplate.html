@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="text-align: center; padding: 20px 0; background-color: #f8f9fa; border-radius: 8px; margin-bottom: 20px;">
+        <h1 style="margin: 0; color: #333333;">Booking Confirmation</h1>
+    </div>
+
+    <p style="margin: 16px 0;">Dear {{ username }},</p>
+
+    <p style="margin: 16px 0;">We hope this email finds you well. This is to inform you that your bus tickets have been successfully booked by {{ booked_by_user }}.</p>
+
+    <div style="background-color: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #e9ecef; margin: 20px 0;">
+        <h2 style="margin: 0 0 16px 0; color: #333333;">Ticket Details:</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #e9ecef;">
+                <td style="padding: 8px 0;">🚌 <strong>Bus Number:</strong></td>
+                <td style="padding: 8px 0;">{{ current_ticket.bus.bus_number }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e9ecef;">
+                <td style="padding: 8px 0;">📅 <strong>Travel Date:</strong></td>
+                <td style="padding: 8px 0;">{{ current_ticket.dateOfBooking|date:"F j, Y" }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e9ecef;">
+                <td style="padding: 8px 0;">⏰ <strong>Departure Time:</strong></td>
+                <td style="padding: 8px 0;">{{ current_ticket.bus.time_start }} Hours</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e9ecef;">
+                <td style="padding: 8px 0;">📍 <strong>From:</strong></td>
+                <td style="padding: 8px 0;">{{ current_ticket.bus.city1 }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e9ecef;">
+                <td style="padding: 8px 0;">🏁 <strong>To:</strong></td>
+                <td style="padding: 8px 0;">{{ current_ticket.bus.city2 }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 0;">💰 <strong>Total Amount:</strong></td>
+                <td style="padding: 8px 0;">&#8377; {{ current_ticket.price}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <p style="margin: 16px 0;"><strong>Important Notes:</strong></p>
+        <div style="padding-left: 20px;">
+            <p style="margin: 8px 0;">• Please arrive at least 30 minutes before departure</p>
+            <p style="margin: 8px 0;">• Carry a valid photo ID for verification</p>
+            <p style="margin: 8px 0;">• Present this booking reference at the counter</p>
+        </div>
+    </div>
+
+        <div style="text-align: center; margin-top: 20px; padding: 20px; font-size: 0.9em; color: #6c757d;">
+        <p style="margin: 8px 0;">Thank you for choosing our service!</p>
+        <p style="margin: 8px 0;">This is an automated email. Please do not reply.</p>
+    </div>
+</body>
+</html>
