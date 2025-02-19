@@ -148,116 +148,119 @@ class pass_updateWallet(View):
     def get(self, request):
         form = WalletUpdateForm()
         return render(request, 'home/pass_walletUpdate.html', {'form': form})
-    
 
-def pass_bookTicket(request, pk, datestr):
-    current_bus = bus.objects.filter(id=pk).first()
-    
-    current_date = date.fromisoformat(datestr)
-    
+def pass_preBookTicket(request, pk, datestr):
+    current_bus = bus.objects.get(id = pk)
     if request.method == 'POST':
-        if 'pass_number' in request.POST:
-            num_pass = int(request.POST.get('num_pass'))
-            if num_pass < 1 or num_pass > 10:
-                messages.error(request, f'Can only book tickets for 1 to 10 passengers at a time')
-                return redirect('pass_bookTicket', pk = pk)
-        
-            PassengerFormSet = formset_factory(PassengerDetailForm, extra=num_pass)
+        num_pass = request.POST.get('num_pass')
+        if int(num_pass) <= current_bus.seats_available and int(num_pass) >= 1:
+            return redirect('pass_bookTicket', pk = pk, datestr = datestr, num_pass = num_pass)
+        else:
+            messages.error(request, 'Only {{currrent_bus.seats_available}} seats are available')
+    return render(request, 'home/pass_preBookTicket.html')
+    
 
-            if 'submitBooking' in request.POST:
-                formset = PassengerFormSet(request.POST)
-                if formset.is_valid():
-                    if request.user.wallet.amount > num_pass*current_bus.fare:
-                        email_otp = generate_otp()
+def pass_bookTicket(request, pk, datestr, num_pass):
+    current_bus = bus.objects.filter(id=pk).first()
+    current_date = date.fromisoformat(datestr)
+    PassengerFormSet = formset_factory(PassengerDetailForm, extra=num_pass)
 
-                        send_mail(
-                            'Booking Confirmation',
-                            f'Your otp for email confirmation is {email_otp}',
-                            settings.EMAIL_HOST_USER,
-                            [request.user.email],
-                            fail_silently=False
-                        )
-                        current_ticket = ticket.objects.create(num = num_pass, 
-                                            bus = current_bus, dateOfBooking = current_date, 
-                                            price = num_pass*int(current_bus.fare),
-                                            city1 = current_bus.city1, city2 = current_bus.city2)
-                        
-                        
-                        if current_ticket.is_confirm == False:
-                            if 'verified' in request.POST:
-                                user_otp = request.POST.get('email_otp')
-                                if verify_otp(email_otp, user_otp):
-                                    current_ticket.is_confirm = True
-                            else:
-                                return render(request, 'home/verify_otp.html')
-                        
-                        if current_ticket.is_confirm:
-                            for form in formset:
-                                    new_instance = form.save(commit = False)
-                                    new_instance.ticket = current_ticket
-                                    new_instance.save()
-                                    current_ticket.users.add(form.cleaned_data.get('user'))
-                                    current_ticket.save()
-                            
-                            current_bus.seats_available -= num_pass
-                            request.user.wallet.amount -= current_ticket.price
-                            request.user.wallet.save()
-                            current_bus.save()
-                            for user in current_ticket.users:
-                                email_context = {
-                                    'username': user.username,
-                                    'current_ticket': current_ticket
-                                }
-                                html_content = render_to_string("pass_bookTicketTemplate.html", email_context)
-                                text_content = render_to_string("pass_bookTicketTemplateText.txt", email_context)
-                                msg = EmailMultiAlternatives(
-                                        "Booking Confirmation",
-                                        text_content,
-                                        settings.EMAIL_HOST_USER,
-                                        user.email,
-                                        headers={"List-Unsubscribe": "<mailto:unsub@example.com>"},
-                                    )
-                                msg.attach_alternative(html_content, "text/html")
-                                msg.send()
-
-                            messages.success(request, f'Your ticket was booked successfully! Rs{current_ticket.price} was deducted from your account.')
-                            messages.success(request, "A confirmation email is sent to the accounts of all the users")
-                            return redirect('home')
-                        
-                            
-                    else:
-                        messages.error(request, f'Garib Saala')
-                                
-                else:
-                    messages.error(request, "The data entered was not valid")
-
-                return render(request, 'home/pass_bookTicket.html', {'formset': formset, 'num_pass': num_pass}) 
+    if request.method == 'POST':
+        formset = PassengerFormSet(request.POST)
+        if formset.is_valid():
+            empty_forms = False
+            for form in formset:
+                if not all([
+                    form.cleaned_data.get('user'), form.cleaned_data.get('fname'), form.cleaned_data.get('lname'), form.cleaned_data.get('age')
+                ]):
+                    empty_forms = True
+                    break;
             
-            formset = PassengerFormSet()
-            return render(request, 'home/pass_bookTicket.html', {'formset': formset, 'num_pass': num_pass})           
-                 
-    if request.method == 'GET':
-        num_pass = 0
-        return render(request, 'home/pass_bookTicket.html', {'num_pass': num_pass})  
+            if not empty_forms:
+                if request.user.wallet.amount > num_pass*current_bus.fare:
+                    email_otp = generate_otp()
 
-# class pass_ticketConfirm(View):
-#     def post(self, request, ticket_id):
-
-#         user_otp = request.POST.get('email_otp') 
-#         if verify_otp()
-#     def get(self, request, ticket_id):
-#         return render(request, 'home/verify_otp.html')    
+                    send_mail(
+                        'Booking Confirmation',
+                        f'Your otp for email confirmation is {email_otp}',
+                        settings.EMAIL_HOST_USER,
+                        [request.user.email],
+                        fail_silently=False
+                    )
+                    current_ticket = ticket.objects.create(num = num_pass, 
+                                        bus = current_bus, dateOfBooking = current_date, 
+                                        price = num_pass*int(current_bus.fare),
+                                        city1 = current_bus.city1, city2 = current_bus.city2, email_otp = email_otp)
+                    
+                    for form in formset:
+                    
+                        new_instance = form.save(commit = False)
+                        new_instance.ticket = current_ticket
+                        new_instance.save()
+                        current_ticket.users.add(form.cleaned_data.get('user'))
+                        current_ticket.save()
+                    
+                    return redirect('pass_bookTicketVerifyOtp', pk = pk, ticket_id = current_ticket.id)
+                else:
+                    print("I am garib")
+                    messages.error(request, f'Garib Saala')
+                            
+            else:
+                messages.error(request, f'All passenger details are not filled')
+        else:
+            print("I am not validated")
+            messages.error(request, "The data entered was not valid")
+        return render(request, 'home/pass_bookTicket.html', {'formset': formset, 'num_pass': num_pass}) 
    
+    else:
+        formset = PassengerFormSet()
+        return render(request, 'home/pass_bookTicket.html', {'formset': formset, 'num_pass': num_pass})          
+                              
+               
+    
+def pass_bookTicketVerifyOtp(request, pk, ticket_id):
+    current_bus = bus.objects.get(id = pk)
+    current_ticket = ticket.objects.get(id = ticket_id)
+    if request.method == 'POST':
+        user_otp = request.POST.get('email_otp')
+        if verify_otp(current_ticket.email_otp, user_otp):
+            current_ticket.is_confirm = True
+            current_ticket.email_otp = None
+            current_bus.seats_available -= current_ticket.num
+            request.user.wallet.amount -= current_ticket.price
+            request.user.wallet.save()
+            current_bus.save()
+            for user in current_ticket.users.all():
+                email_context = {
+                    'username': user.username,
+                    'current_ticket': current_ticket
+                }
+                html_content = render_to_string("home/pass_bookTicketTemplate.html", email_context)
+                text_content = render_to_string("home/pass_bookTicketTemplateText.txt", email_context)
+                msg = EmailMultiAlternatives(
+                        "Booking Confirmation",
+                        text_content,
+                        settings.EMAIL_HOST_USER,
+                        [user.email],
+                        headers={"List-Unsubscribe": "<mailto:unsub@example.com>"},
+                    )
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
+
+            messages.success(request, f'Your ticket was booked successfully! Rs{current_ticket.price} was deducted from your account.')
+            messages.success(request, "A confirmation email is sent to the accounts of all the users")
+            return redirect('home')
+            
+        else:
+            messages.error(request, f'Invalid OTP')
+    return render(request, 'home/verify_otp.html')
 
 
-        
-        
+
 def upcomingTripsView(request):
     tickets = request.user.ticket_set.filer(dateOfBooking__gt = timezone.now()).order_by('dateOfBooking')  
-    return render(request, 'home/upcomingTripView.html')    
-
-   
-    
+    return render(request, 'home/upcomingTripView.html')           
+             
 
 #passenger views end here.....
 

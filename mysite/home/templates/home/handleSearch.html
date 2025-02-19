@@ -20,7 +20,7 @@
         {%for bus in busList%}
         <tr>
             <th scope="row">{{forloop.counter}}</th>
-            <td><a href = "{%url 'pass_bookTicket' bus.id datestr%}">{{bus.name}}</a></td>
+            <td><a href = "{%url 'pass_preBookTicket' bus.id datestr%}">{{bus.name}}</a></td>
             <td>{{bus.bus_number}}</td>
             <td>{{bus.city1}}</td>
             <td>{{bus.city2}}</td>
