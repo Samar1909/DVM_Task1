@@ -1,0 +1,34 @@
+{%extends 'home/admin_base.html'%}
+{%block title%}<title>Reservation List for {{ticket.bus.name}}</title>{%endblock title%}
+{%block content%}
+<h1 class = "border-bottom mb-3 mt-3">Passenger Details</h1>
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Username</th>
+        <th scope="col">First Name</th>
+        <th scope="col">From</th>
+        <th scope="col">To</th>
+        <th scope="col">Date Of Travel</th>
+      </tr>
+    </thead>
+    <tbody>
+        {%for ticket in tickets%}
+        {%for passDetail in passDetails%}
+        <tr>
+            <th scope="row">{{forloop.counter}}</th>
+            <td>{{passDetail.user.username}}</td>
+            <td>{{passDetail.fname}}</td>
+            <td>{{passDetail.lname}}</td>
+            <td>{{passDetail.age}}</td>
+            <td>{{ticket.dateOfBooking}}</td>
+        </tr> 
+        {%endfor%}
+        
+
+    </tbody>
+</table>
+<a href = "{%url 'admin_export_data_to_excel' ticket.bus.id%}"><button class = "btn btn-primary">Export to Excel</button></a></button>
+{%endfor%}
+{%endblock%}

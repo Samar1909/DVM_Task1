@@ -1,4 +1,5 @@
 from django.shortcuts import render, HttpResponse, redirect
+from django.http import JsonResponse
 from django.views import View
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
@@ -9,7 +10,7 @@ from . models import *
 from . decorators import *
 from . forms import *
 from . utils import generate_otp, verify_otp
-from django.forms import formset_factory
+from django.forms import formset_factory, modelformset_factory
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.core.mail import send_mail, EmailMultiAlternatives
@@ -17,7 +18,7 @@ from django.conf import settings
 from django.db import IntegrityError
 from datetime import date
 from django.template.loader import render_to_string
-import time
+import pandas as pd
 
 # Create your views here.
 @unauthenticated_user
@@ -288,10 +289,15 @@ def pass_cancelTicket(request, pk):
         if request.user in current_ticket.users.all():
             if request.method == 'POST':
                 if len(current_ticket.users.all()) == 1:
+                    current_ticket.bus.seats_available += 1
+                    current_ticket.bus.save() 
                     current_ticket.delete()
                     messages.success(request, f'Your ticket was successfully deleted')
                 else:
                     current_ticket.users.remove(request.user)
+                    current_ticket.bus.seats_available += 1
+                    current_ticket.bus.save() 
+                    current_ticket.save()
                     messages.success(request, f'Your ticket was successfully deleted')
                 return redirect('home')
             else:
@@ -300,6 +306,23 @@ def pass_cancelTicket(request, pk):
             return HttpResponse("You are Not authorized to view this page", status = 401)
     else:
         return HttpResponse("Page Not Found", status = 404)
+    
+def pass_updatePassDetails(request, pk):
+    current_ticket = ticket.objects.get(id = pk)
+    PassengerFormSet = modelformset_factory(passDetails,form = PassengerDetailForm, extra=0)
+    formset = PassengerFormSet(queryset = current_ticket.passdetails_set.all())
+
+    if request.method == 'POST':
+        formset = PassengerFormSet(request.POST)
+        instances = formset.save(commit=False)
+        for instance in instances:
+            instance.ticket = current_ticket
+            instance.save()
+        messages.success(request, f'Passenger details have been updated')
+        return redirect('pass_ticketDetail', pk = current_ticket.id)
+    
+    return render(request, 'home/pass_updatePassDetails.html', {'formset': formset})
+        
              
 
 #passenger views end here.....
@@ -366,6 +389,36 @@ class admin_busUpdateView(View):
         current_bus = bus.objects.get(id = pk)
         form = AddBusForm(instance = current_bus)
         return render(request, 'home/admin_busUpdateView.html', {'form': form})
+    
+def admin_busReservationList(request, pk):
+    current_bus = bus.objects.get(id = pk)
+    current_tickets = current_bus.ticket_set.all()
+    passengerDetails = passDetails.objects.filter(ticket__bus=current_bus)      
+    return render(request, 'home/admin_busReservationList.html', {'tickets': current_tickets, 'passDetails': passengerDetails})
+    
+def admin_excelExport(request, pk):
+    current_bus = bus.objects.get(id = pk)
+    current_tickets = current_bus.ticket_set.all()
+    passengerDetails = passDetails.objects.filter(ticket__bus=current_bus)
+    data = []
+    for passdetail in passengerDetails:
+        data.append(
+            {
+                'Username': passdetail.user.username,
+                'First Name': passdetail.fname,
+                'Last Name': passdetail.lname,
+                'Age': passdetail.age,
+                'Date of Travel': passdetail.ticket.dateOfBooking
+            }
+        )
+    df = pd.DataFrame(data)  
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename= {current_bus.name}({current_bus.bus_number}).xlsx'
+
+    df.to_excel(response,engine = 'openpyxl')
+
+    return response
+
 
 # admin views end here.....
 

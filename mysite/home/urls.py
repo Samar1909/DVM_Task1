@@ -18,11 +18,13 @@ urlpatterns = [
     path('passenger/upcomingTrips', views.pass_upcomingTripsView, name = "pass_upcomingTripsview"),
     path('passenger/tickets/<int:pk>/', views.pass_ticketDetailView, name = "pass_ticketDetail"),
     path('passenger/tickets/<int:pk>/cancel', views.pass_cancelTicket, name = "pass_cancelTicket"),
+    path('passenger/tickets/<int:pk>/update/passengerDetails', views.pass_updatePassDetails, name = "pass_updatePassDetails"),
     path('administrator/home', views.admin_home, name = "admin_home"),
     path('administrator/addBus', admin_addBus.as_view(), name = 'admin_addBus'),
     path('administrator/listOfBuses', admin_busListView.as_view(), name = "admin_busListView"),
     path('administartor/buses/<int:pk>', views.admin_busDetailView, name = "admin_busDetailView"),
     path('administartor/buses/<int:pk>/update', admin_busUpdateView.as_view(), name = "admin_busUpdateView"),
-
+    path('administrator/buses/<int:pk>/reservation_details', views.admin_busReservationList, name = "admin_busReservationList"),
+    path('administrator/buses/<int:pk>/reservation_details/export_data_to_excel/', views.admin_excelExport, name="admin_export_data_to_excel")
     # path('admin/login', admin_login.as_view(), name = 'admin_login'),
 ]

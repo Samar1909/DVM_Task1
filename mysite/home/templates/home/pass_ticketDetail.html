@@ -16,6 +16,7 @@
         <p class = "form-group"><strong>Available Seats: </strong><span>{{ticket.bus.seats_available}}</span></p>
         <p class = "form-group"><strong>Departing Time: </strong><span>{{ticket.bus.time_start}}</span></p>
         <p class = "form-group"><strong>Fare: </strong><span>&#8377; {{ticket.bus.fare}}</span></p>
+        <a href="{%url 'pass_updatePassDetails' ticket.id%}"><button class = "form-group btn btn-primary">Change Passenger Details</button></a>
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cancelTicket">
             Cancel Your Ticket
         </button>

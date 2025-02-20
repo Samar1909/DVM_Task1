@@ -13,6 +13,7 @@
         <p class = "form-group"><strong>Operating days: </strong><span>{{bus.operating_days}}</span></p>
         <p class = "form-group"><strong>Departing Time: </strong><span>{{bus.time_start}}</span></p>
         <p class = "form-group"><strong>Fare: </strong><span>&#8377; {{bus.fare}}</span></p>
+        <a class = "form-group" href = "{%url 'admin_busReservationList' bus.id%}"><button class = "btn btn-primary">View Reservation List</button></a>
         <a class = "form-group" href = "{%url 'admin_busUpdateView' bus.id%}"><button class = "btn btn-primary">Update Bus Details</button></a>
     {%else%}
         <p class = "mt-3"><strong>The bus with the queried id doesn't exist</strong></p>
