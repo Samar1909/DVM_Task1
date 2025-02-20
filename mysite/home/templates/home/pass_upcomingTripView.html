@@ -1,4 +1,6 @@
 {%extends 'home/pass_base.html'%}
+{%block title%}<title>Upcoming Trips</title>{%endblock title%}
+{%block upcomingTrips%}active{%endblock upcomingTrips%}
 {%block content%}
 <h1 class = "border-bottom mb-3 mt-3">Your Upcoming Trips</h1>
 <table class="table">
@@ -9,26 +11,26 @@
         <th scope="col">Bus Number</th>
         <th scope="col">From</th>
         <th scope="col">To</th>
-        <th scope="col">Total Seats</th>
-        <th scope="col">Available Seats</th>
+        <th scope="col">On</th>
         <th scope="col">Departing Time</th>
         <th scope="col">Ariving Time</th>
         <th scope="col">Fare</th>
+      
       </tr>
     </thead>
     <tbody>
-        {%for bus in busList%}
+        {%for ticket in tickets%}
         <tr>
             <th scope="row">{{forloop.counter}}</th>
-            <td><a href = "{%url 'pass_bookTicket' bus.id datestr%}">{{bus.name}}</a></td>
-            <td>{{bus.bus_number}}</td>
-            <td>{{bus.city1}}</td>
-            <td>{{bus.city2}}</td>
-            <td>{{bus.seats_total}}</td>
-            <td>{{bus.seats_available}}</td>
-            <td>{{bus.time_start}} Hours</td>
-            <td>{{bus.time_end}} Hours</td>
-            <td>&#8377; {{bus.fare}}</td>
+            <td><a href = "{%url 'pass_ticketDetail' ticket.id%}">{{ticket.bus.name}}</a></td>
+            <td>{{ticket.bus.bus_number}}</td>
+            <td>{{ticket.city1}}</td>
+            <td>{{ticket.city2}}</td>
+            <td>{{ticket.dateOfBooking}}</td>
+            <td>{{ticket.bus.time_start}} Hours</td>
+            <td>{{ticket.bus.time_end}} Hours</td>
+            <td>&#8377; {{ticket.bus.fare}}</td>
+            
         </tr> 
         {%endfor%}
 

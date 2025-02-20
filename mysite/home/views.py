@@ -149,6 +149,8 @@ class pass_updateWallet(View):
         form = WalletUpdateForm()
         return render(request, 'home/pass_walletUpdate.html', {'form': form})
 
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['passenger'])
 def pass_preBookTicket(request, pk, datestr):
     current_bus = bus.objects.get(id = pk)
     if request.method == 'POST':
@@ -159,7 +161,8 @@ def pass_preBookTicket(request, pk, datestr):
             messages.error(request, 'Only {{currrent_bus.seats_available}} seats are available')
     return render(request, 'home/pass_preBookTicket.html')
     
-
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['passenger'])
 def pass_bookTicket(request, pk, datestr, num_pass):
     current_bus = bus.objects.filter(id=pk).first()
     current_date = date.fromisoformat(datestr)
@@ -217,7 +220,8 @@ def pass_bookTicket(request, pk, datestr, num_pass):
         return render(request, 'home/pass_bookTicket.html', {'formset': formset, 'num_pass': num_pass})          
                               
                
-    
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['passenger'])    
 def pass_bookTicketVerifyOtp(request, pk, ticket_id):
     current_bus = bus.objects.get(id = pk)
     current_ticket = ticket.objects.get(id = ticket_id)
@@ -255,11 +259,47 @@ def pass_bookTicketVerifyOtp(request, pk, ticket_id):
             messages.error(request, f'Invalid OTP')
     return render(request, 'home/verify_otp.html')
 
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['passenger'])
+def pass_upcomingTripsView(request):
+    tickets = request.user.ticket_set.filter(dateOfBooking__gt = timezone.now()).order_by('dateOfBooking')  
+    return render(request, 'home/pass_upcomingTripView.html', {'tickets': tickets})
 
 
-def upcomingTripsView(request):
-    tickets = request.user.ticket_set.filer(dateOfBooking__gt = timezone.now()).order_by('dateOfBooking')  
-    return render(request, 'home/upcomingTripView.html')           
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['passenger'])
+def pass_ticketDetailView(request, pk):
+    if ticket.objects.filter(id = pk).exists():
+        current_ticket = ticket.objects.filter(id = pk).first()
+        if request.user in current_ticket.users.all():
+            passengers = current_ticket.users.all()
+            ticket_bus = current_ticket.bus
+            return render(request, 'home/pass_ticketDetail.html', {'ticket': current_ticket, 'passengers': passengers, 'bus': ticket_bus})
+        else:
+            return HttpResponse("You are Not authorized to view this page", status = 401)
+    else:
+        return HttpResponse("Page Not Found", status = 404)
+
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['passenger'])
+def pass_cancelTicket(request, pk):
+    if ticket.objects.filter(id = pk).exists():
+        current_ticket = ticket.objects.filter(id = pk).first()
+        if request.user in current_ticket.users.all():
+            if request.method == 'POST':
+                if len(current_ticket.users.all()) == 1:
+                    current_ticket.delete()
+                    messages.success(request, f'Your ticket was successfully deleted')
+                else:
+                    current_ticket.users.remove(request.user)
+                    messages.success(request, f'Your ticket was successfully deleted')
+                return redirect('home')
+            else:
+                return HttpResponse("404 - Not allowed", status =404)            
+        else:
+            return HttpResponse("You are Not authorized to view this page", status = 401)
+    else:
+        return HttpResponse("Page Not Found", status = 404)
              
 
 #passenger views end here.....

@@ -1,0 +1,47 @@
+{%extends 'home/pass_base.html'%}
+{%block title%}<title>{{ticket.bus.name}}</title>{%endblock title%}
+
+{%block content%}
+        <h1 class = "border-bottom mb-4 mt-3">{{ticket.bus.name}}</h1>
+        <p class = "form-group"><strong>Bus Number: </strong><span>{{ticket.bus.bus_number}}</span></p>
+        <p class = "form-group"><strong>Name: </strong><span>{{ticket.bus.name}}</span></p>
+        <p class = "form-group"><strong>Passengers: </strong>
+            {%for passenger in passengers%}
+                <span>{{passenger.username}}</span>
+            {%endfor%}</p>
+        <p class = "form-group"><strong>From: </strong><span>{{ticket.city1}}</span></p>
+        <p class = "form-group"><strong>To: </strong><span>{{ticket.city2}}</span></p>
+        <p class = "form-group"><strong>To: </strong><span>{{ticket.dateOfBooking}}</span></p>
+        <p class = "form-group"><strong>Total Seats: </strong><span>{{ticket.bus.seats_total}}</span></p>
+        <p class = "form-group"><strong>Available Seats: </strong><span>{{ticket.bus.seats_available}}</span></p>
+        <p class = "form-group"><strong>Departing Time: </strong><span>{{ticket.bus.time_start}}</span></p>
+        <p class = "form-group"><strong>Fare: </strong><span>&#8377; {{ticket.bus.fare}}</span></p>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cancelTicket">
+            Cancel Your Ticket
+        </button>
+    
+    <!-- Cancel Ticket Modal -->
+    <div class="modal fade" id="cancelTicket" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Cancel Your Ticket</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action = "{%url 'pass_cancelTicket' ticket.id%}">
+                {%csrf_token%}
+                <div class="modal-body">
+                  <p class = "fw-semibold fs-2">Are you sure, you want to cancel your ticket.</p>
+                  <p class = "fw-light fs-4">Note: Cancelling your ticket doesn't cancel other passenger's ticket</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="submit" name = "nocancel"class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="submit" name = "cancel" class="btn btn-primary">Cancel Ticket</button>
+                </div>
+            </form>
+          </div>
+        </div>
+      </div
+             
+    
+{%endblock content%}
